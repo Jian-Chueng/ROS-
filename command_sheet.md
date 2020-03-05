@@ -20,6 +20,14 @@ sudo lsb_release -a
 
 咱的版本： kinetic 1.12.14
 
+## 查看网路
+
+```shell
+$ ifconfig
+```
+
+
+
 ### catkin方式创建ROS工作空间**
 
 ROS Fuerte及早期版本请选择rosbuild

@@ -20,7 +20,9 @@ sc-staff@leonardo:~$ mocap_start
 
 ```
 
+正常显示：
 
+![image-20200305111157116](pic/image-20200305111157116.png)
 
 ### 新终端运行pioneer：
 
@@ -79,7 +81,7 @@ test.py
 sc-staff@leonardo:~/catkin_ws/src/<package-name>/<new file_name>$ chmod +x test.py 
 sc-staff@leonardo:~/catkin_ws/src/<package-name>/<new file_name>$ ls
 test.py
-sc-staff@leonardo:~/catkin_ws/src/<package-name>/<new file_name>$ catkin build jian_ugv 
+sc-staff@leonardo:~/catkin_ws/src/<package-name>/<new file_name>$ catkin build <package-name>
 ```
 
 ![image-20200304192902166](pic/image-20200304192902166.png)
@@ -90,13 +92,15 @@ build后记得source the files
 sc-staff@leonardo:~/catkin_ws/src/jian_ugv/scripts$ source ~/catkin_ws/devel/setup.bash
 ```
 
+![image-20200305112220244](pic/image-20200305112220244.png)
+
 在pioneer上运行
 
 ```shell
 sc-staff@leonardo:~/catkin_ws/src/jian_ugv/scripts$ rosrun jian_ugv test.py 
 ```
 
-### ![image-20200304193127705](pic/image-20200304193127705.png)删除package
+### 删除package
 
 ```shell
 sc-staff@leonardo:~/catkin_ws/src$ rm -r <package-name>
