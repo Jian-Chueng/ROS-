@@ -17,9 +17,9 @@ $ roscore
 ###### 创建workspace
 
 ```shell
-jian@jian-ubuntu:~$ mkdir -p ~/catkin_ws/src
-jian@jian-ubuntu:~$ cd ~/catkin_ws/
-jian@jian-ubuntu:~/catkin_ws$ catkin_make
+$ mkdir -p ~/catkin_ws/src
+$ cd ~/catkin_ws/
+$ catkin_make
 ```
 
 For Python3 最后一个指令:
@@ -45,7 +45,7 @@ $ source devel/setup.bash
 确保ROS_PACKAGE_PATH 在一下dictionary中
 
 ```shell
-jian@jian-ubuntu:~/catkin_ws$ echo $ROS_PACKAGE_PATH
+$ echo $ROS_PACKAGE_PATH
 ```
 
 ![image-20200304151651049](pic/image-20200304151651049.png)
