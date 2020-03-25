@@ -1,5 +1,51 @@
 # ROS 常用命令字典
 
+```shell
+# roscore will start up a ROS Master, a ROS Parameter Server and a rosout logging node
+$ roscore
+
+# rosnode is a command-line tool for printing information about ROS Nodes.
+$ rosnode list
+
+# rospack allows you to get information about packages. 
+
+$ rospack list
+
+# rosrun will locate PACKAGE and try to find an executable named EXECUTABLE in the PACKAGE tree. If it finds it, it will run it with ARGS.
+# Usage: rosrun [--prefix cmd] [--debug] PACKAGE EXECUTABLE [ARGS]
+$ rosrun turtlesim turtlesim_node
+$ rosrun turtlesim turtle_teleop_key
+
+# record the message which published in the topic
+$ rosbag record /turtle1/cmd_vel
+
+# check what's happen in ros system
+$ rosrun rqt_graph rqt_graph
+
+# rqt_plot displays a scrolling time plot of the data published on topics
+$ rosrun rqt_plot rqt_plot
+
+# rostopic is a command-line tool for printing information about ROS Topics.
+$ rostopic list
+
+# rostopic echo shows the data published on a topic.
+$ rostopic echo /turtle1/cmd_vel
+
+# rostopic type returns the message type of any topic being published.
+$ rostopic type /turtle1/cmd_vel
+
+# rostopic pub publishes data on to a topic currently advertised.
+$ rostopic pub -1 /turtle1/cmd_vel geometry_msgs/Twist -- '[2.0, 0.0, 0.0]' '[0.0, 0.0, 1.8]'
+
+# rostopic hz reports the rate at which data is published.
+$ rostopic hz /turtle1/pose
+
+# check info of /turtlesim node
+$ rosnode info /turtlesim
+```
+
+
+
 ## 创建ROS workspace
 
 ###### 启动ROS
