@@ -43,7 +43,17 @@ sudo rosdep init
 rosdep update
 ```
 
+如果显示：sudo: rosdep：找不到命令
+
+```shell
+sudo apt update
+sudo apt upgrade
+sudo apt-get install python-rosdep
+```
+
 ![](pic/2020-03-18 23-33-52.png)
+
+
 
 ### 6. 环境设置
 
