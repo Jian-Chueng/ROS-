@@ -74,6 +74,13 @@ For Python3 最后一个指令:
 $ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
+###### 编译 ROS 程序
+
+```shell
+$ cd ~/catkin_ws/
+$ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+
 **参数说明**：
 
 - -p 确保目录名称存在，不存在的就建一个。
