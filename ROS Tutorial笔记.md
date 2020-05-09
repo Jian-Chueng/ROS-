@@ -364,3 +364,5 @@ $ rostopic pub /turtle1/cmd_vel geometry_msgs/Twist -r 1 -- '[1.5, 0.0, 0.0]' '[
 
 ## 
 
+[ROS/Tutorials 学到这了](http://wiki.ros.org/ROS/Tutorials/UnderstandingTopics)
+
