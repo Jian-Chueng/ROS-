@@ -1,4 +1,4 @@
-# ROS 常用命令字典
+#   ROS 常用命令字典
 
 ```shell
 # roscore will start up a ROS Master, a ROS Parameter Server and a rosout logging node
@@ -58,8 +58,6 @@ $ roscore
 
 **新窗口**
 
-
-
 ###### 创建workspace
 
 ```shell
@@ -78,16 +76,22 @@ $ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
 ```shell
 $ cd ~/catkin_ws/
-$ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+$ catkin_make
+#或者 $ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
-**参数说明**：
 
-- -p 确保目录名称存在，不存在的就建一个。
 
 ![image-20200304144234515](pic/image-20200304144234515.png)
 
 catkin_ws文件里面有三个文档：buid, devel, src。
+
+###### 添加程序包到全局路径
+
+```shell
+$ echo "source catkin_ws/devel/setip.bash">> ~/.bashrc
+$ source ~/.bashrc
+```
 
 source setup.*sh file:
 
@@ -95,20 +99,13 @@ source setup.*sh file:
 $ source devel/setup.bash
 ```
 
-确保ROS_PACKAGE_PATH 在一下dictionary中
+###### 查看ros包路径环境变量是否配置好
 
 ```shell
 $ echo $ROS_PACKAGE_PATH
 ```
 
-![image-20200304151651049](pic/image-20200304151651049.png)
-
-添加程序包到全局路径
-
-```shell
-$ echo "source catkin_ws/devel/setip.bash">> ~/.bashrc
-$ source ~/.bashrc
-```
+![image-20200304151651049](image/image-20200304151651049.png)
 
 ## package 相关
 
@@ -131,6 +128,13 @@ $ rospack find [package name]
 
 ![image-20200304152916544](pic/image-20200304152916544.png)
 
+###### 查看 Package 依赖 
+
+```shell
+$ rospack depends <package_name>
+$ rospack depends1 <package_name>
+```
+
 ###### change directory roscd
 
 ```shell
@@ -139,27 +143,15 @@ $ roscd [locationname[/subdir]]
 
 ![image-20200304153126439](pic/image-20200304153126439.png)
 
-###### print the working directory 
-
-```shell
-$ pwd
-```
-
-![image-20200304153255857](pic/image-20200304153255857.png)
-
 ###### 列表 rosls
 
 ```shell
 $ rosls [locationname[/subdir]]
 ```
 
-![image-20200304153808782](pic/image-20200304153808782.png)
+![image-20200304153808782](image/image-20200304153808782.png)
 
 感觉和ls差不多
-
-###### **大救星Tab键**
-
-不清楚的不打完, 按Tab键 once:会自动补全;twice:list installed packages
 
 ## Node 相关
 
@@ -188,6 +180,8 @@ $ rosrun [package_name] [node_name]
 ```
 
 ![image-20200304160704599](pic/image-20200304160704599.png)
+
+
 
 ![：](pic/image-20200304160727590.png)
 
@@ -225,6 +219,7 @@ $ rosrun turtlesim turtle_teleop_key
 
 ```shell
 $ rosrun rqt_graph rqt_graph
+$ rosrun rqt_plot rqt_plot
 ```
 
 ![image-20200305143401224](pic/image-20200305143401224.png)
@@ -246,6 +241,12 @@ rostopic hz     display publishing rate of topic
 rostopic list   print information about active topics
 rostopic pub    publish data to topic
 rostopic type   print topic type
+```
+
+###### 查看所有 Topic 列表
+
+```shell
+$ rostopic list
 ```
 
 ###### 查看某个 Topic 信息
@@ -360,3 +361,6 @@ $ rostopic pub /turtle1/cmd_vel geometry_msgs/Twist -r 1 -- '[1.5, 0.0, 0.0]' '[
 **注意：[]间有空格**,不加.0也可以
 
 ![image-20200305154349987](pic/image-20200305154349987.png)
+
+## 
+
