@@ -10,7 +10,9 @@ STDR可以完美的与ROS兼容配套，机器人上的传感器数据都是通�
 
 [http://wiki.ros.org/stdr_simulator](https://www.corvin.cn/go?url=http://wiki.ros.org/stdr_simulator)
 
-## 安装
+## 1. 初次认识STDR
+
+### 安装
 
 方法一：失败
 
@@ -63,11 +65,11 @@ rospack list|grep stdr
 
 ![image-20200508201802197](pic/image-20200508201802197.png)
 
-## STDR代码架构介绍
+### STDR代码架构介绍
 
 ![Screenshot from 2018-03-23 17:06:45.png](pic/1521797077844974.png)
 
-## 启动STDR进行仿真
+### 启动STDR进行仿真
 
 ```shell
 roslaunch stdr_launchers server_with_map_and_gui_plus_robot.launch
@@ -85,7 +87,7 @@ roslaunch stdr_launchers server_with_map_and_gui_plus_robot.launch
 roslaunch stdr_launchers rviz.launch
 ```
 
-解决方法：打开rviz，
+解决方法：打开rviz，（确保：roscore已经打开
 
 ```shell
 rviz 
@@ -107,7 +109,7 @@ rviz
 
 ![](pic/rosgraph.png)
 
-## 控制机器人移动
+### 控制机器人移动
 
 1. 直接往控制其移动的/robot0/cmd_vel话题中发送消息
 
@@ -215,7 +217,7 @@ currently:	speed 0.53366445	turn 0.515656670859
 
 ```
 
-## 多个机器人
+### 控制多个机器人
 
 添加、删除机器人， 图中机器人型号：pandora_robot.xml
 
@@ -235,9 +237,9 @@ rostopic pub -1 /robot１/cmd_vel geometry_msgs/Twist '{linear: {x: 0, y: 0, z: 
 
 ![4.gif](pic/1521950746112042.gif)
 
-#### Bonus:
+### Bonus:
 
-##### rostopic pub
+#### rostopic pub用法
 
 `pub <topic-name> <topic-type> [data...]`
 
@@ -262,3 +264,224 @@ rostopic pub -1 /robot１/cmd_vel geometry_msgs/Twist '{linear: {x: 0, y: 0, z: 
 >`-f FILE` **New in Diamondback**
 >
 >- Read message fields from YAML file. YAML syntax is equivalent to output of `rostopic echo`. Messages are separated using YAML document separator `---`. To use only the first message in a file, use the `--latch` option.
+
+### 超声波话题及其消息格式
+
+```shell
+rostopic info /robot0/sonar_0                --打印话题相关信息
+rosmsg show sensor_msgs/Range    --显示超声波消息格式
+rostopic echo /robot0/sonar_0              --查看数据输出
+```
+
+> sonar_0:中       sonar_1：左边       sonar_2：右边       sonar_3：后偏左       sonar_4：后偏右              
+
+![Screenshot from 2018-03-29 17:28:54.png](pic/1522315980515913.png)
+
+![image-20200509201356338](pic/image-20200509201356338.png)
+
+![Screenshot from 2018-03-29 17:23:13.png](pic/1522317702697841.png)
+
+
+
+![image-20200509201325859](pic/image-20200509201325859.png)
+
+### 超声波的测距输出
+
+![Screenshot from 2018-03-29 18:08:09.png](pic/1522318485533889.png)
+
+#### 避障code
+
+```c++
+/**************************************************************
+ *Copyright(C): ROS小课堂 www.corvin.cn
+ *FileName: main.cpp
+ *Author: corvin
+ *Date: 20180330
+ *Description:在STDR上进行超声波避障策略仿真,实验代码.
+ *
+ **************************************************************/
+#include "ros/ros.h"
+#include "sensor_msgs/Range.h"
+#include "geometry_msgs/Twist.h"
+ 
+#define  setbit(x, y)  x|=(1<<y)
+#define  clrbit(x, y)  x&=~(1<<y)
+ 
+//low three bit as sonar warn flag
+//           left  font right
+// x x x x  x  0    0    0
+#define  STATUS_A   0x04  // v x x
+#define  STATUS_B   0x02  // x v x
+#define  STATUS_C   0x01  // x x v
+#define  STATUS_D   0x07  // v v v
+#define  STATUS_E   0x06  // v v x
+#define  STATUS_F   0x03  // x v v
+#define  STATUS_G   0x05  // v x v
+ 
+ 
+//global variable
+geometry_msgs::Twist twist_cmd;
+ros::Publisher twist_pub;
+ 
+const double warn_range = 0.5;  //warn check distance
+ 
+double default_period_hz = 10;  //hz
+double default_linear_x = 0.5;  // (m/s)
+double default_yaw_rate = 0.5;  // rad/s
+ 
+double range_array[3]; //save three sonar value
+ 
+ 
+ 
+void sonar0_callback(const sensor_msgs::Range::ConstPtr& msg)
+{
+    ROS_INFO("front Sonar0 range:[%f]", msg->range);
+    range_array[1] = msg->range;
+}
+ 
+void sonar1_callback(const sensor_msgs::Range::ConstPtr& msg)
+{
+    ROS_INFO("left Sonar1 range:[%f]", msg->range);
+    range_array[0] = msg->range;
+}
+ 
+void sonar2_callback(const sensor_msgs::Range::ConstPtr& msg)
+{
+    ROS_INFO("right Sonar2 range:[%f]", msg->range);
+    range_array[2] = msg->range;
+}
+ 
+void publishTwistCmd(double linear_x, double angular_z)
+{
+    twist_cmd.linear.x = linear_x;
+    twist_cmd.linear.y = 0.0;
+    twist_cmd.linear.z = 0.0;
+ 
+    twist_cmd.angular.x = 0.0;
+    twist_cmd.angular.y = 0.0;
+    twist_cmd.angular.z = angular_z;
+ 
+    twist_pub.publish(twist_cmd);
+}
+ 
+void checkSonarRange(double sonar_l, double sonar_f, double sonar_r)
+{
+   unsigned char flag = 0;
+ 
+   if(sonar_l < warn_range)
+   {
+       setbit(flag, 2);
+   }
+   else
+   {
+       clrbit(flag, 2);
+   }
+ 
+   if(sonar_f < warn_range)
+   {
+       setbit(flag, 1);
+   }
+   else
+   {
+       clrbit(flag, 1);
+   }
+ 
+   if(sonar_r < warn_range)
+   {
+       setbit(flag, 0);
+   }
+   else
+   {
+       clrbit(flag, 0);
+   }
+ 
+   ROS_INFO("CheckSonarRange get status:0x%x", flag);
+   switch(flag)
+   {
+    case STATUS_A: //turn right 0x04
+        ROS_WARN("left warn,turn right");
+        publishTwistCmd(0, -default_yaw_rate);
+        break;
+ 
+    case STATUS_B: // 0x02
+        ROS_WARN("front warn, left and right ok, compare left and right value to turn");
+        if(sonar_l > sonar_r)
+        {
+            ROS_WARN("turn left");
+            publishTwistCmd(0, default_yaw_rate);
+        }
+        else
+        {
+            ROS_WARN("turn right");
+            publishTwistCmd(0, -default_yaw_rate);
+        }
+        break;
+ 
+    case STATUS_C: //turn left
+        ROS_WARN("left ok, front ok, right warn, turn left");
+        publishTwistCmd(0, default_yaw_rate);
+        break;
+ 
+    case STATUS_D:
+        ROS_WARN("left,front,right all warn, turn back");
+        publishTwistCmd(0, 10*default_yaw_rate);
+        break;
+ 
+    case STATUS_E:
+        ROS_WARN("left warn, front warn, right ok, turn right");
+        publishTwistCmd(0, (-default_yaw_rate*2));
+        break;
+ 
+    case STATUS_F:
+        ROS_WARN("left ok, front warn, right warn, turn left");
+        publishTwistCmd(0, (default_yaw_rate*2));
+        break;
+ 
+    case STATUS_G:
+        ROS_WARN("left and right warn, front ok, speed up");
+        publishTwistCmd(2*default_linear_x, 0);
+        break;
+ 
+    default: //go forward straight line
+        publishTwistCmd(default_linear_x, 0);
+        break;
+   }
+ 
+}
+ 
+ 
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "ultrasonic_obstacle_avoidance_node");
+    ros::NodeHandle handle;
+    ros::Rate loop_rate = default_period_hz;
+ 
+    ros::Subscriber sub_sonar0 = handle.subscribe("/robot0/sonar_0", 100, sonar0_callback);
+    ros::Subscriber sub_sonar1 = handle.subscribe("/robot0/sonar_1", 100, sonar1_callback);
+    ros::Subscriber sub_sonar2 = handle.subscribe("/robot0/sonar_2", 100, sonar2_callback);
+ 
+    twist_pub = handle.advertise<geometry_msgs::Twist>("/robot0/cmd_vel", 10);
+ 
+    while(ros::ok())
+    {
+       checkSonarRange(range_array[0], range_array[1], range_array[2]);
+ 
+       ros::spinOnce();
+       loop_rate.sleep();
+    }
+ 
+    return 0;
+}
+```
+
+略看了一下，详情下面
+
+#### Reference:
+
+https://www.corvin.cn/573.html
+
+
+
+## 2. 测试自动导航
+
+### 使用gmapping构建2D栅格地图
