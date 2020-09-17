@@ -44,7 +44,28 @@ $ rostopic hz /turtle1/pose
 $ rosnode info /turtlesim
 ```
 
+##### master
 
+用于管理节点间的通信，ROS Master 通过RPC（Remote Procedure Call Protocol，远程过程调用）提供了登记列表和对其他计算图表的查找。没有控制器，节点将无法找到其他节点，交换消息或调用服务。
+开启Master命令：roscore
+
+##### node（节点）
+
+节点就是一些独立编译，执行运算任务的进程。ROS利用规模可增长的方式使代码模块化：一个系统就是典型的由很多节点组成的。在这里，节点也可以被称之为“软件模块”。我们使用“节点”使得基于ROS的系统在运行的时候更加形象化：当许多节点同时运行时，可以很方便的将端对端的通讯绘制成一个图表，在这个图表中，进程就是图中的节点，而端对端的连接关系就是其中弧线连接。
+
+运行节点，rosrun package_name node_name
+
+查看激活节点列表，rosnode list
+
+检索有关节点信息，rosnode info node_name
+
+##### topics 主题
+
+在ROS中消息以一种发布/订阅的方式传递。一个节点可以在一个给定的主题中发布消息。一个节点针对某个主题关注与订阅特定类型的数据。可能同时有多个节点发布或者订阅同一个主题的消息。总体上，发布者和订阅者不了解彼此的存在。
+
+查看激活主题：rostopic list
+订阅和打印一个主题的内容：rostopic echo /topic
+显示主题相关信息： rostopic info /topic
 
 ## 创建ROS workspace
 
