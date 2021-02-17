@@ -57,6 +57,8 @@ sudo apt-get install python-rosdep
 
 ### 6. 环境设置
 
+每次打开新terminal都要输入
+
 ```shell
 echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 ```

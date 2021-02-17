@@ -2,7 +2,11 @@
 
 - 打开新的command window**： Ctrl + Alt + t
 
+- 常用更新代码
 
+  `sudo apt-get update`,`sudo apt-get upgrade`,`sudo apt autoremove`
+
+  
 
 - 查看Ubuntu版本
 
@@ -340,6 +344,8 @@ rostopic list   print information about active topics
 rostopic pub    publish data to topic
 rostopic type   print topic type
 ```
+
+Taha:`rostopic pub -l /rostopic name [TAB]`
 
 ###### 查看所有 Topic 列表
 
