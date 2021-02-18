@@ -1,6 +1,6 @@
 ## Linux 命令  俺可以～～😄
 
-- 打开新的command window**： Ctrl + Alt + t
+- 打开新的command window： Ctrl + Alt + t
 
 - 常用更新代码
 
@@ -29,9 +29,7 @@
   $ pwd
   ```
 
-  ![image-20200304153255857](image/image-20200304153255857.png)
-
-  
+  ![image-20200304153255857](../Documents/GitHub/ROS-Learning-note/pic/image-20200304153255857.png)
 
 - mkdir “创建一个目录”
 
@@ -121,13 +119,19 @@
 >
 ># rospack
 ># 查找某个pkg的地址
->$ rospack find package_name
+>$ rospack find [package_name]
 ># 列出本地所有的pkg 
 >$ rospack list 
 >
 ># roscd 
 ># 跳转到某个pkg路径下
 >$ roscd package_name
+>
+>#查看ROS package path
+>$ echo $ROS_PACKAGE_PATH
+>
+>#roscd log ROS存log文件处（没roscore过不存在）
+>$ roscd log
 >
 ># rosls 
 ># 列举出某个pkg下的文件信息
@@ -146,7 +150,7 @@
 >$ rosdep install [pkg_name} 
 >```
 
-#### ![img](image/v2-07a18520cf03a3589e0686eea7564209_1440w.jpg)
+![v2-07a18520cf03a3589e0686eea7564209_1440w](../Documents/GitHub/ROS-Learning-note/pic/v2-07a18520cf03a3589e0686eea7564209_1440w-1613588446136.jpg)
 
 #### catkin
 
@@ -155,7 +159,9 @@
 - catkin_make
 - catkin build
 
-**创建workspace**
+#### **创建workspace**
+
+**注意: catkin编译之前需要回到工作空间目录，`catkin_make`在其他路径下编译不会成功。编译完成后，如果有新的目标文件产生（原来没有），那么一般紧跟着要source刷新环境，使得系统能够找到刚才编译生成的ROS可执行文件。这个细节比较容易遗漏，致使后面出现可执行文件无法打开等错误。**
 
 ```shell
 $ mkdir -p ~/catkin_ws/src
@@ -169,14 +175,28 @@ For Python3 最后一个指令:
 $ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
-**添加程序包到全局路径**
+完成catkin_make的workspace文件包含三个文件夹：
+
+`build`, `devel`, `src`
+
+- src/: ROS的catkin软件包（源代码包） **所有的code在src文件中**
+- build/: catkin（CMake）的缓存信息和中间文件
+- devel/: 生成的目标文件（包括头文件，动态链接库，静态链接库，可执行文件等）、环境变量
+
+**每次改完code**需要new build需要terminal在catkin_ws文件中**再次输入**：`catkin_make`
+
+
+
+**source workspace**
+
+添加程序包到全局路径bashrc
 
 ```shell
 $ echo "source catkin_ws/devel/setip.bash">> ~/.bashrc
 $ source ~/.bashrc
 ```
 
-source setup.*sh file:
+source setup.bash file: 保证在进入devel文件内
 
 ```shell
 $ source devel/setup.bash
@@ -188,15 +208,70 @@ $ source devel/setup.bash
 $ echo $ROS_PACKAGE_PATH
 ```
 
-![image-20200304151651049](image/image-20200304151651049.png)
+![image-20200304151651049](../Documents/GitHub/ROS-Learning-note/pic/image-20200304151651049.png)
 
-**catkin_make与catkin build的区别**
+catkin编译的工作流程如下：
 
-与catkin_make不同，catkin命令行工具不仅仅是围绕cmake和make命令的瘦包装器。 catkin build命令隔离地在工作空间的源空间中构建每个包，以防止构建时串扰。 因此，在其最简单的用法中，catkin构建的行为类似于catkin_make_isolated的并行化版本。
+1. 首先在工作空间`catkin_ws/src/`下递归的查找其中每一个ROS的package。
+2. package中会有`package.xml`和`CMakeLists.txt`文件，Catkin(CMake)编译系统依据`CMakeLists.txt`文件,从而生成`makefiles`(放在`catkin_ws/build/`)。
+3. 然后`make`刚刚生成的`makefiles`等文件，编译链接生成可执行文件(放在`catkin_ws/devel`)。\
+
+也就是说，Catkin就是将`cmake`与`make`指令做了一个封装从而完成整个编译过程的工具。catkin有比较突出的优点，主要是：
+
+- 操作更加简单
+- 一次配置，多次使用
+- 跨依赖项目编译
+
+
+
+#### package的创建
+
+1个package下常见的文件、路径有：
+
+```
+  ├── CMakeLists.txt    #package的编译规则(必须)
+  ├── package.xml       #package的描述信息(必须)
+  ├── src/              #源代码文件
+  ├── include/          #C++头文件
+  ├── scripts/          #可执行脚本
+  ├── msg/              #自定义消息
+  ├── srv/              #自定义服务
+  ├── models/           #3D模型文件
+  ├── urdf/             #urdf文件
+  ├── launch/           #launch文件
+```
+
+其中一个Catkin的软件包（package）必须要包括两个文件：
+
+- package.xml: 包括了package的描述信息
+  - name, description, version, maintainer(s), license
+  - opt. authors, url's, dependencies, plugins, etc...
+- CMakeLists.txt: 构建package所需的CMake文件
+  - 调用Catkin的函数/宏
+  - 解析`package.xml`
+  - 找到其他依赖的catkin软件包
+  - 将本软件包添加到环境变量
+
+**创建package在`catkin_ws/src`下**
+
+```shell
+$ cd ~/catkin_ws/src
+$ catkin_create_pkg <package_name> [depend1] [depend2] [depend3]
+$ cd ~/catkin_ws
+$ catkin_make
+```
+
+例子：
+
+```shell
+$ catkin_create_pkg test_pkg roscpp rospy std_msgs
+```
+
+
 
 #### Package安装方法
 
-##### **Deb二进制包安装方式**
+- Deb二进制包安装方式
 
 deb方式安装方法十分简单，根据ROS版本，直接运行apt-get命令，例如：
 
@@ -204,7 +279,7 @@ deb方式安装方法十分简单，根据ROS版本，直接运行apt-get命令�
 $ sudo apt-get install ros-kinetic-camera-calibration
 ```
 
-##### 源码安装方式
+- 源码安装方式
 
 源码安装方式稍微复杂，安装方法如下：
 
@@ -212,9 +287,14 @@ $ sudo apt-get install ros-kinetic-camera-calibration
 2. 在catkin工作空间的src文件夹下，下载ROS的Package源代码
 3. 使用catkin build命令编译安装
 
-#### **大救星Tab键**
+- **大救星Tab键**
 
 不清楚的不打完, 按Tab键 once:会自动补全;twice:list installed packages
+
+```
+rosls <<<TAB twice>>
+# list all currently installed packages
+```
 
 
 
@@ -264,7 +344,7 @@ $ source ~/.bashrc
 
 ###### 创建 Package 并编译
 
-```shell
+```
 $ cd ~/catkin_ws/src
 $ catkin_create_pkg <package_name> [depend1] [depend2] [depend3]
 $ cd ~/catkin_ws
