@@ -57,8 +57,6 @@ sudo apt-get install python-rosdep
 
 ### 6. 环境设置
 
-每次打开新terminal都要输入
-
 ```shell
 echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 ```
@@ -108,4 +106,12 @@ rosrun turtlesim turtle_teleop_key
 ![IMG_6442](pic/IMG_6442.JPG)
 
 ![IMG_6443](pic/IMG_6443.JPG)
+
+2021.2.17 uodate:
+
+如果没有写在`.bashrc.`每次在新terminal使用ROS都要输入 (已经写入，无需每次都输入了)
+
+```bash
+source /opt/ros/melodic/setup.bash
+```
 
