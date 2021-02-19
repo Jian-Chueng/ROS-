@@ -29,7 +29,7 @@
   $ pwd
   ```
 
-  ![image-20200304153255857](../Documents/GitHub/ROS-Learning-note/pic/image-20200304153255857.png)
+  ![image-20200304153255857](pic/image-20200304153255857.png)
 
 - mkdir “创建一个目录”
 
@@ -102,6 +102,37 @@
 
   删除当前目录下的所有文件及目录，命令行为：`rm  -r  * `
 
+## vim 常用
+
+```shell
+vim fileName	//vim打开文件，文件需带有绝对路径
+i				//编辑文件
+esc     		//退出编辑状态
+
+退出先Esc
+wq：	保存退出
+:x： 保存退出
+wqa：保存所有文件并退出
+q!： 不保存退出
+qa!：有多个文件被打开，同时退出
+
+x: 删除光标后一个字符,相当于 Del 
+ 
+X: 删除光标前一个字符,相当于 Backspace
+
+dd: 删除光标所在行,n dd 删除指定的行数 
+
+u: 一步一步撤销 
+ 
+Ctrl+r: 反撤销
+
+/: str查找
+　　　　n: 下一个
+　　　　N：上一个
+```
+
+![img](../../Documents/GitHub/ROS-Learning-note/pic/aHR0cHM6Ly9pbWFnZXMyMDE4LmNuYmxvZ3MuY29tL2Jsb2cvMTI2OTYyOS8yMDE4MDMvMTI2OTYyOS0yMDE4MDMyODEyMzgyODU5OC0xNDIzMjI2MjMyLmpwZw.jpeg)
+
 ## ROS命令
 
 #### **常用指令：**
@@ -150,7 +181,7 @@
 >$ rosdep install [pkg_name} 
 >```
 
-![v2-07a18520cf03a3589e0686eea7564209_1440w](../Documents/GitHub/ROS-Learning-note/pic/v2-07a18520cf03a3589e0686eea7564209_1440w-1613588446136.jpg)
+![](../../Documents/GitHub/ROS-Learning-note/pic/v2-07a18520cf03a3589e0686eea7564209_1440w.jpg)
 
 #### catkin
 
@@ -185,7 +216,7 @@ $ catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
 **每次改完code**需要new build需要terminal在catkin_ws文件中**再次输入**：`catkin_make`
 
-
+![img](../../Documents/GitHub/ROS-Learning-note/pic/catkin_flow.jpg)
 
 **source workspace**
 
@@ -208,7 +239,7 @@ $ source devel/setup.bash
 $ echo $ROS_PACKAGE_PATH
 ```
 
-![image-20200304151651049](../Documents/GitHub/ROS-Learning-note/pic/image-20200304151651049.png)
+![image-20200304151651049](pic/image-20200304151651049.png)
 
 catkin编译的工作流程如下：
 
@@ -264,7 +295,28 @@ $ catkin_make
 例子：
 
 ```shell
-$ catkin_create_pkg test_pkg roscpp rospy std_msgs
+$ catkin_create_pkg my_tut roscpp rospy std_msgs
+```
+
+![image-20210219053843259](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219053843259.png)
+
+这样就会在当前路径下新建`my_tut`软件包，包括：
+
+```
+  ├── CMakeLists.txt
+  ├── include
+  │   └── my_tut
+  ├── package.xml
+  └── src
+```
+
+再次回到workspace中catkin_make & source至.bashrc
+
+```shell
+$ cd ~/catkin_ws
+$ catkin_make
+
+$ . ~/catkin_ws/devel/setup.bash
 ```
 
 
@@ -364,9 +416,11 @@ $ rospack depends <package_name>
 $ rospack depends1 <package_name>
 ```
 
-
+These dependencies for a package are stored in the **package.xml** file
 
 #### Node 相关
+
+node不可以用相同的名字
 
 ###### 查看所有正在运行的 Node
 
@@ -387,6 +441,52 @@ $ rosnode info [node_name]
 ```shell
 $ rosrun [package_name] [node_name]
 ```
+
+
+
+###### py例子1: **先new terminal运行roscore**
+
+python code位于**Jian/python_ws/src/my_tut/scripts**
+
+`chmod +x first_node.py`变绿色可执行文件
+
+每次修改不需要catkin_make,直接运行即可
+
+![image-20210219065416854](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219065416854.png)
+
+![image-20210219065507649](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219065507649.png)
+
+###### py例子2：
+
+每0.1s输出一个info
+
+![image-20210219070502219](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219070502219.png)
+
+node运行中可查看`rosnode list`
+
+无法同时launch多个同一个名字的node（可改名字）
+
+###### c++例子1:
+
+cpp code位于**Jian/python_ws/src/my_tut/src**
+
+里面node的名字也和python不同，可以同时在一个ROS中运行
+
+修改完需要打开Jian/python_ws/src/my_tut/CMakeLists.txt
+
+For Noetic, Python version at least: 3.0.2
+
+find_package有：roscpp
+
+![image-20210219173654021](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219173654021.png)
+
+添加这两行指令：cpp executable+link libraries
+
+![image-20210219173527501](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219173527501.png)
+
+需要catkin_make: `jian@jian-ubuntu:~/python_ws$ catkin_make`
+
+###### c++例子2
 
 #### Topic相关
 
