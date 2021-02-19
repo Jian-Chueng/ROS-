@@ -109,7 +109,7 @@ vim fileName	//vim打开文件，文件需带有绝对路径
 i				//编辑文件
 esc     		//退出编辑状态
 
-退出先Esc
+退出先ctl+c
 wq：	保存退出
 :x： 保存退出
 wqa：保存所有文件并退出
@@ -434,15 +434,21 @@ $ rosnode list
 $ rosnode info [node_name]
 ```
 
-###### 运行 Node
-
-**新终端运行**
+###### 结束某个node
 
 ```shell
-$ rosrun [package_name] [node_name]
+$ rosnode kill [node_name]
 ```
 
+###### 测试连接节点
 
+Ping (test connectivity) a node repeatedly. rosrun了的才会有反应
+
+```shell
+$ rosnode ping [node_name] 
+```
+
+![img](../../Documents/GitHub/ROS-Learning-note/pic/masterandnode.png)
 
 ###### py例子1: **先new terminal运行roscore**
 
@@ -468,6 +474,12 @@ node运行中可查看`rosnode list`
 
 ###### c++例子1:
 
+一直报错因为cpp '' 和""不同！！要用双引号。
+
+为什么vs code更新但是vim没有：move了fist_node.cpp 的位置没有在VS code 重新打开并保存
+
+![image-20210219195758376](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219195758376.png)
+
 cpp code位于**Jian/python_ws/src/my_tut/src**
 
 里面node的名字也和python不同，可以同时在一个ROS中运行
@@ -486,9 +498,88 @@ find_package有：roscpp
 
 需要catkin_make: `jian@jian-ubuntu:~/python_ws$ catkin_make`
 
+新生成executable node_cpp
+
+![image-20210219214229010](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219214229010.png)
+
 ###### c++例子2
 
+![image-20210219220303814](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219220303814.png)
+
+没有新node，不需要修改CMakeList.txt
+
+![image-20210219220427715](../../Documents/GitHub/ROS-Learning-note/pic/image-20210219220427715.png)
+
+显示新node：my_first_cpp_node
+
+###### 运行 Node
+
+上边run的方法太繁琐，使用rosrun
+
+**新终端运行**
+
+```shell
+$ rosrun [package_name] [node_name]
+
+$ rosrun my_tut first_node.py
+$ rosrun my_tut node_cpp
+```
+
+注意：executable python是文件名;cpp是CMakeLists.txt中自己定的名字。 需要rosrun node 中查看，ctl+c退出就不显示了
+
+![image-20210220002123349](../../Documents/GitHub/ROS-Learning-note/pic/image-20210220002123349.png)
+
+###### 图形化显示 topic rqt_graph
+
+```shell
+$ rosrun rqt_graph rqt_graph
+$ rosrun rqt_plot rqt_plot
+```
+
+钩掉Debug
+
+![image-20210220004217418](../../Documents/GitHub/ROS-Learning-note/pic/image-20210220004217418.png)
+
+rosrun my_tut node_cpp
+
+rosrun my_tut first_node.py
+
+![image-20210220010759209](../../Documents/GitHub/ROS-Learning-note/pic/image-20210220010759209.png)
+
+###### node with turtlesim
+
+新终端：打开turtlesim
+
+```shell
+$ rosrun turtlesim turtlesim_node  //负责显示turtle的node
+```
+
+![image-20200305114410201](../../Documents/GitHub/ROS-Learning-note/pic/image-20200305114410201.png)
+
+新终端:键盘控制turtlesim
+
+```shell
+$ rosrun turtlesim turtle_teleop_key //负责控制turtle的node
+```
+
+![image-20200305114644654](../../Documents/GitHub/ROS-Learning-note/pic/image-20200305114644654.png)
+
+![image-20210220012714038](../../Documents/GitHub/ROS-Learning-note/pic/image-20210220012714038.png)
+
+**turtlesim_node, turtle_teleop_key是 turtlesim这个package中executable的名字**
+
+**/turtlesim, /teleop_turtle是node的名字**
+
 #### Topic相关
+
+- topic的通信方式是ROS中比较常见的单向异步通信方式
+
+- topic 有massage type
+- ROS master帮助node 订阅 topics
+
+
+
+
 
 >```pytb
 ># 与Topic、Msg相关命令
@@ -533,7 +624,7 @@ Taha:`rostopic pub -l /rostopic name [TAB]`
 $ rostopic list
 ```
 
-###### 图形化显示 topic
+###### 图形化显示 topic rqt_graph
 
 ```shell
 $ rosrun rqt_graph rqt_graph
@@ -634,3 +725,17 @@ $ rosbag info <bagfile_name>
 ```
 $ rosbag play (-r 2) <bagfile_name>
 ```
+
+
+
+
+
+
+
+
+
+
+
+#### refernce
+
+udemy, [book](https://sychaichangkun.gitbooks.io/ros-tutorial-icourse163/content/chapter3/3.1.html)
