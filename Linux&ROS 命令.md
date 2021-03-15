@@ -1,4 +1,4 @@
-## Linux 命令  俺可以～～😄
+Linux 命令  俺可以～～😄
 
 - 打开新的command window： Ctrl + Alt + t
 
@@ -577,10 +577,6 @@ $ rosrun turtlesim turtle_teleop_key //负责控制turtle的node
 - topic 有massage type
 - ROS master帮助node 订阅 topics
 
-
-
-
-
 >```pytb
 ># 与Topic、Msg相关命令
 >
@@ -649,6 +645,325 @@ $ rosmsg show [msg_type]
 ```shell
 $ rostopic pub [topic] [msg_type] [args]
 ```
+
+###### py例子publisher
+
+在 ~/python_ws/src/my_tut/scripts 建立 pub.py, 让其excutable
+
+`chmod +x pub.py`, pub.py:
+
+```python
+#!/usr/bin/env python3
+
+import rospy
+from std_msgs.msg import String
+
+if __name__=='__main__':
+    rospy.init_node('robot_news_transmitter') #initialized node's name
+    pub = rospy.Publisher('/robot_news_pub', String,queue_size=10)  #topic's name
+
+    rate = rospy.Rate(2) #2hz -> 0.5 sec
+
+    while not rospy.is_shutdown():
+        msg = String()
+        msg.data ="Hi, this is robot news publisher."
+        pub.publish(msg)
+        rate.sleep()
+        
+    rospy.loginfo("Node is stopped.")
+```
+
+ros版本： ros noetic
+
+Terminal 1: roscore
+
+Terminal 2运行pub.py: python3 pub.py
+
+Terminal 3 查看node: rosnode list
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ rosnode list
+/robot_news_transmitter
+/rosout
+```
+
+Terminal 4 查看 topic & echo
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ rostopic list
+/robot_news_pub
+/rosout
+/rosout_agg
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ rostopic echo /robot_news_pub
+data: "Hi, this is robot news publisher."
+---
+data: "Hi, this is robot news publisher."
+---
+data: "Hi, this is robot news publisher."
+---
+data: "Hi, this is robot news publisher."
+
+```
+
+###### py例子subscriber　
+
+接收上面pub.py的信号 sub.py
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ ls
+first_node.py  pub.py  sub.py
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ chmod +x sub.py
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ ls
+first_node.py  pub.py  sub.py
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ 
+```
+
+```
+#!usr/bin/env python3
+
+import rospy
+from std_msgs.msg import String
+
+def callback_receive_radio_data(msg):
+    rospy.loginfo('Messsage received: ')
+    rospy.loginfo(msg)
+
+if __name__=='__main__':
+    rospy.init_node('smartphone_subscriber')
+    sub =rospy.Subscriber('/robot_news_pub', String, callback_receive_radio_data) #subscribe的topic's name 和publish的一致
+    rospy.spin()
+
+```
+
+ros版本： ros noetic
+
+Terminal 1: roscore
+
+Terminal 2运行sub.py: python3 sub.py
+
+Terminal 3 运行pub: rosrun my_tut pub.py
+
+此时Terminal 2：
+
+```shell
+INFO] [1615833237.726734]: Messsage received: 
+[INFO] [1615833237.730774]: data: "Hi, this is robot news publisher."
+[INFO] [1615833238.225839]: Messsage received: 
+[INFO] [1615833238.230374]: data: "Hi, this is robot news publisher."
+[INFO] [1615833238.725763]: Messsage received: 
+[INFO] [1615833238.729962]: data: "Hi, this is robot news publisher."
+```
+
+###### C++例子publisher
+
+```shell
+ian@jian-ubuntu:~/python_ws/src/my_tut$ ls
+CMakeLists.txt  include  package.xml  scripts  src
+jian@jian-ubuntu:~/python_ws/src/my_tut$ cd src/
+jian@jian-ubuntu:~/python_ws/src/my_tut/src$ ls
+first_node.cpp
+jian@jian-ubuntu:~/python_ws/src/my_tut/src$ 
+jian@jian-ubuntu:~/python_ws/src/my_tut/src$ touch pub_cpp.cpp  //不用excutable
+jian@jian-ubuntu:~/python_ws/src/my_tut/src$ ls
+first_node.cpp  pub_cpp.cpp
+```
+
+pub_cpp.cpp
+
+```cpp
+#include <ros/ros.h>
+#include <std_msgs/String.h>
+
+int main (int argc, char **argv)
+{       
+        ros::init(argc, argv, "robot_news_transmitter");
+        ros::NodeHandle nh;
+
+        ros::Publisher pub = nh.advertise<msgs::String>("/robot_news_pub", 10);
+
+        ros::Rate rate(3)
+
+        while (ros::ok()){
+            std_msgs::String msg;
+            msg.data = "Hi, this is cpp robot news publisher.";
+            pub.publish(msg);
+            rate.sleep();
+        }
+
+
+} 
+```
+
+**记得需catkin_make**
+
+Terminal1:进入CMakeLists.txt 增加excutable
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut$ ls
+CMakeLists.txt  include  package.xml  scripts  src
+jian@jian-ubuntu:~/python_ws/src/my_tut$ vim CMakeLists.txt 
+```
+
+```shell
+# add_executable(${PROJECT_NAME}_node src/my_tut_node.cpp)
+
+add_executable(node_cpp src/first_node.cpp)
+
+target_link_libraries(node_cpp ${catkin_LIBRARIES})
+－－－－－－－－新增部分－－－
+add_executable(robot_news_transmitter src/pub_cpp.cpp)
+
+target_link_libraries(robot_news_transmitter ${catkin_LIBRARIES})
+
+```
+
+Terminal2:
+
+```shell
+jian@jian-ubuntu:~/python_ws$ catkin_make
+
+...
+Scanning dependencies of target robot_news_transmitter
+[ 25%] Building CXX object my_tut/CMakeFiles/robot_news_transmitter.dir/src/pub_cpp.cpp.o
+[ 75%] Built target node_cpp
+[100%] Linking CXX executable /home/jian/python_ws/devel/lib/my_tut/robot_news_transmitter --新生成的部分
+[100%] Built target robot_news_transmitter
+
+```
+
+Terminal 3: roscore
+
+Terminal4运行robot_news_transmitter: 
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ rosrun my_tut 
+first_node.py           pub.py                  sub.py
+node_cpp                robot_news_transmitter  
+jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ rosrun my_tut robot_news_transmitter 
+
+```
+
+Terminal5:
+
+```shell
+jian@jian-ubuntu:~/python_ws$ rosnode list
+/robot_news_transmitter
+/rosout
+```
+
+Terminal6:
+
+```shell
+jian@jian-ubuntu:~/python_ws$ rostopic list
+/robot_news_pub
+/rosout
+/rosout_agg
+jian@jian-ubuntu:~/python_ws$ rostopic echo /robot_news_pub
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+
+```
+
+###### C++例子subscriber　
+
+sub_cpp.cpp
+
+```cpp
+#include <ros/ros.h>
+#include<std_msgs/String.h>
+
+
+void callback_receive_news_data(const std_msgs::String& msg)
+{
+        ROS_INFO("Message received: %s",msg.data.c_str());
+
+
+}
+
+int main (int argc, char **argv){
+        ros::init(argc, argv, "smartphone_subscriber");
+        ros::NodeHandle nh;
+
+        ros::Subscriber sub = nh.subscribe("/robot_news_pub",1000, callback_receive_news_data);
+
+        ros::spin();
+}    
+```
+
+Terminal1:
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut$ vim CMakeLists.txt 
+---------------------------
+
+# add_executable(${PROJECT_NAME}_node src/my_tut_node.cpp)
+
+add_executable(node_cpp src/first_node.cpp)
+
+target_link_libraries(node_cpp ${catkin_LIBRARIES})
+
+add_executable(robot_news_transmitter src/pub_cpp.cpp)
+
+target_link_libraries(robot_news_transmitter ${catkin_LIBRARIES})
+－－－－－－－－新增部分－－－
+add_executable(smartphone_subscriber src/sub_cpp.cpp)
+
+target_link_libraries(smartphone_subscriber ${catkin_LIBRARIES})
+
+
+```
+
+Terminal2: 
+
+```shell
+jian@jian-ubuntu:~/python_ws$ catkin_make
+
+
+...
+Scanning dependencies of target smartphone_subscriber
+[ 16%] Building CXX object my_tut/CMakeFiles/smartphone_subscriber.dir/src/sub_cpp.cpp.o
+[ 50%] Built target robot_news_transmitter
+[ 83%] Built target node_cpp
+[100%] Linking CXX executable /home/jian/python_ws/devel/lib/my_tut/smartphone_subscriber --新生成部分
+[100%] Built target smartphone_subscriber
+```
+
+Terminal 3: roscore
+
+Terminal4 rosnode, rostopic list:
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut$ rosnode list
+/robot_news_transmitter
+/rosout
+/smartphone_subscriber
+jian@jian-ubuntu:~/python_ws/src/my_tut$ rostopic list
+/robot_news_pub
+/rosout
+/rosout_agg
+
+```
+
+Terminal 5 rosrun pub_cpp
+
+```shell
+jian@jian-ubuntu:~/python_ws$ rosrun my_tut robot_news_transmitter 
+```
+
+Terminal 6 rosrun sub_cpp
+
+```shell
+jian@jian-ubuntu:~/python_ws/src/my_tut/src$ rosrun my_tut smartphone_subscriber 
+[ INFO] [1615840177.637129074]: Message received: Hi, this is cpp robot news publisher.
+[ INFO] [1615840177.970222663]: Message received: Hi, this is cpp robot news publisher.
+[ INFO] [1615840178.303499780]: Message received: Hi, this is cpp robot news publisher.
+[ INFO] [1615840178.636910307]: Message received: Hi, this is cpp robot news publisher.
+```
+
+**code 改变要catkin_make**
 
 #### Service 相关操作
 
