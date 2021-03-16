@@ -718,8 +718,8 @@ first_node.py  pub.py  sub.py
 jian@jian-ubuntu:~/python_ws/src/my_tut/scripts$ 
 ```
 
-```
-#!usr/bin/env python3
+```python
+#!/usr/bin/env python3
 
 import rospy
 from std_msgs.msg import String
@@ -964,6 +964,92 @@ jian@jian-ubuntu:~/python_ws/src/my_tut/src$ rosrun my_tut smartphone_subscriber
 ```
 
 **code 改变要catkin_make**
+
+###### 进阶
+
+![image-20210317013141239](../../Documents/GitHub/ROS-Learning-note/pic/image-20210317013141239.png)
+
+`rosrun package executable`运行　而且cpp python可以一起运行:python可以接收 cpp, cpp也可以接收python
+
+###### anonymous
+
+python: `rospy.init_node('robot_news_transmitter',*anonymous*=True) #initialized node's name`
+
+cpp: `ros::init(*argc*, *argv*, "robot_news_transmitter", ros::init_options:: AnonymousName);`
+
+![image-20210317022445836](../../Documents/GitHub/ROS-Learning-note/pic/image-20210317022445836.png)
+
+![image-20210317022516121](../../Documents/GitHub/ROS-Learning-note/pic/image-20210317022516121.png)
+
+#### `rostopic -h`
+
+![image-20210317022756884](../../Documents/GitHub/ROS-Learning-note/pic/image-20210317022756884.png)
+
+```sh
+前提：只运行了一个publisher:
+jian@jian-ubuntu:~/python_ws$ rosrun my_tut robot_news_transmitter 
+-----------------------------------------------------------------------
+jian@jian-ubuntu:~$ rostopic list
+/robot_news_pub
+/rosout
+/rosout_agg
+
+jian@jian-ubuntu:~$ rostopic echo /robot_news_pub 
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+---
+data: "Hi, this is cpp robot news publisher."
+---
+
+jian@jian-ubuntu:~$ rostopic info /robot_news_pub 
+Type: std_msgs/String
+
+Publishers: 
+ * /robot_news_transmitter_1615909611938430076 (http://jian-ubuntu:40651/)
+
+Subscribers: None
+
+
+jian@jian-ubuntu:~$ rostopic pub -r 2 /robot_news_pub std_msgs/String "data: 'Hi from rostopic pub'" 
+rate: 2hz publish msg
+jian@jian-ubuntu:~$ rostopic pub -1 /robot_news_pub std_msgs/String "data: 'Hi from rostopic pub'" 
+publish msg once
+
+
+jian@jian-ubuntu:~$ rosnode info /smartphone_subscriber 
+--------------------------------------------------------------------------------
+Node [/smartphone_subscriber]
+Publications: 
+ * /rosout [rosgraph_msgs/Log]
+
+Subscriptions: 
+ * /robot_news_pub [std_msgs/String]
+
+Services: 
+ * /smartphone_subscriber/get_loggers
+ * /smartphone_subscriber/set_logger_level
+
+
+contacting node http://jian-ubuntu:32851/ ...
+Pid: 10854
+Connections:
+ * topic: /rosout
+    * to: /rosout
+    * direction: outbound (40391 - 127.0.0.1:44388) [8]
+    * transport: TCPROS
+ * topic: /robot_news_pub
+    * to: /robot_news_transmitter_1615909611938430076 (http://jian-ubuntu:40651/)
+    * direction: inbound
+    * transport: TCPROS
+
+```
+
+![image-20210317025809960](../../Documents/GitHub/ROS-Learning-note/pic/image-20210317025809960.png)
 
 #### Service 相关操作
 
